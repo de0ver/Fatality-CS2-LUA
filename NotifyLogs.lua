@@ -1,7 +1,14 @@
 local logs = gui.checkbox(gui.control_id('enable_logs'));
-local row = gui.make_control('Notify Logs', logs);
+local console_logs = gui.checkbox(gui.control_id('console_logs'));
+local c_logs = gui.make_control('Notify Logs', logs);
+local c_con_logs = gui.make_control('Console Logs', console_logs);
 local group = gui.ctx:find('lua>elements a');
-group:add(row);
+
+group:add(c_logs);
+group:reset();
+
+group:add(c_con_logs);
+group:reset();
 
 local hitgroup = {
 	[0] = 'generic',
@@ -104,7 +111,7 @@ setmetatable(bomb_events, {
     end
 });
 
-local function bomb_logs(event)
+local function bomb_logs(event, console, notify)
 	local userid = 'undefined';
 	
 	if event:get_controller('userid'):get_name() ~= nil then
@@ -115,18 +122,24 @@ local function bomb_logs(event)
 		userid..
 		'>'..
 		bomb_events[event:get_name()];
-		
-	print(message);
 	
-	return gui.notify:add(gui.notification(
+	if console then
+		print(message);
+	end
+	
+	if (notify) then
+		gui.notify:add(gui.notification(
 		'<'..
 		userid..
 		'>',
 		bomb_events[event:get_name()], 
 		draw.textures['icon_visuals']));
+	end
+	
+	return;
 end
 
-local function hit_logs(event)
+local function hit_logs(event, console, notify)
 	local weapon = 'undefined';
 	
 	if weapon_name[event:get_string('weapon')] ~= 'undefined' and 
@@ -152,16 +165,20 @@ local function hit_logs(event)
 		..hitgroup[event:get_int('hitgroup')]..
 		' with '
 		..weapon;
-		
-	print(message);
-		
-	return gui.notify:add(gui.notification(
+	
+	if console then
+		print(message);
+	end
+	
+	if notify then
+		gui.notify:add(gui.notification(
 		'Hit!',
 		message,
 		draw.textures['icon_rage']));
+	end
 end
 
-local function hurt_logs(event)
+local function hurt_logs(event, console, notify)
 	local attacker = 'undefined';
 	
 	if event:get_controller('attacker'):get_name() ~= nil then
@@ -178,38 +195,54 @@ local function hurt_logs(event)
 		..hitgroup[event:get_int('hitgroup')]..
 		' with '
 		..weapon_name[event:get_string('weapon')];
-		
-	print(message);
 	
-	return gui.notify:add(gui.notification(
+	if console then
+		print(message);
+	end
+	
+	if notify then
+	    gui.notify:add(gui.notification(
 		'Hurt!', 
 		message, 
 		draw.textures['icon_legit']));
+	end
+	
+	return;
 end
 
-local function round_logs(event)
-	return gui.notify:add(gui.notification(
+local function round_logs(event, console, notify)
+	local message = 'Round started!'..'Buy weapons and FIGHT!!!';
+	
+	if console then
+		print(message);
+	end
+	
+	if notify then
+		gui.notify:add(gui.notification(
 		'Round started!', 
 		'Buy weapons and FIGHT!!!', 
 		draw.textures['icon_visuals']));
+	end
+	
+	return;
 end
 
 local function on_event(event)
-	if logs:get_value():get() then
+	if logs:get_value():get() or console_logs:get_value():get() then
 		if event:get_name() == 'player_hurt' then
 			if event:get_controller('attacker') == entities.get_local_controller() then
-				return hit_logs(event);
+				return hit_logs(event, console_logs:get_value():get(), logs:get_value():get());
 			elseif event:get_controller('userid') == entities.get_local_controller() then
-				return hurt_logs(event);
+				return hurt_logs(event, console_logs:get_value():get(), logs:get_value():get());
 			end
 		end
 		
 		if event:get_name() == 'round_start' then
-			return round_logs(event);
+			return round_logs(event, console_logs:get_value():get(), logs:get_value():get());
 		end
 		 
 		if string.find(event:get_name(), 'bomb_') then
-			return bomb_logs(event);
+			return bomb_logs(event, console_logs:get_value():get(), logs:get_value():get());
 		end
 	end
 end
