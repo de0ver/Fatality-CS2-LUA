@@ -18,6 +18,13 @@ local hitgroup = {
 	[6] = 'left leg',
 	[7] = 'right leg'
 };
+
+setmetatable(hitgroup, {
+    __index = function(_, key)
+        return key;
+    end
+});
+
 local weapon_name = {
 	['ak47'] = 'AK-47',
     ['aug'] = 'AUG',
@@ -62,22 +69,43 @@ local weapon_name = {
     ['taser'] = 'Zeus',
     ['tec9'] = 'Tec-9',
     ['ump45'] = 'UMP-45',
-    ['usp silencer'] = 'USP-S',
+    ['usp_silencer'] = 'USP-S',
     ['xm1014'] = 'XM1014',
 	['hegrenade'] = 'HE Grenade',
 	['inferno'] = 'Fire'
 };
+
+local fuck_valve = {
+	['weapon_revolver'] = 'R8 Revolver',
+	['weapon_usp_silencer'] = 'USP-S',
+	['weapon_m4a1_silencer'] = 'M4A1-S'
+};
+
+setmetatable(weapon_name, {
+    __index = function(_, key)
+        return 'undefined';
+    end
+});
+
+setmetatable(fuck_valve, {
+    __index = function(_, key)
+        return key;
+    end
+});
+
 local bomb_events = {
-	['bomb_beginplant'] = 'Begin planting the bomb',
-	['bomb_abortplant'] = 'Cancelled planting the bomb',
-	['bomb_planted'] = 'Planted the bomb',
-	['bomb_defused'] = 'Defused the bomb',
-	['bomb_exploded'] = 'Exploded the bomb'
+	['bomb_beginplant'] = ' Began planting the bomb',
+	['bomb_abortplant'] = ' Cancelled planting the bomb',
+	['bomb_planted'] = ' Planted the bomb',
+	['bomb_defused'] = ' Defused the bomb',
+	['bomb_exploded'] = ' Exploded the bomb'
 };
-local bombsite = {
-	[0] = 'A',
-	[1] = 'B'
-};
+
+setmetatable(bomb_events, {
+    __index = function(_, key)
+        return key;
+    end
+});
 
 local function bomb_logs(event)
 	print('<'..
@@ -94,6 +122,15 @@ local function bomb_logs(event)
 end
 
 local function hit_logs(event)
+	local weapon = 'undefined';
+	
+	if weapon_name[event:get_string('weapon')] ~= 'undefined' and 
+		fuck_valve[event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name] == event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name then
+		weapon = weapon_name[event:get_string('weapon')];
+	else 
+		weapon = fuck_valve[event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name];
+	end
+	
 	local message = 'Hit <'
 		..event:get_controller('userid'):get_name()..
 		'> for '
@@ -103,7 +140,7 @@ local function hit_logs(event)
 		') hp in '
 		..hitgroup[event:get_int('hitgroup')]..
 		' with '
-		..weapon_name[event:get_string('weapon')];
+		..weapon;
 		
 	print(message);
 		
