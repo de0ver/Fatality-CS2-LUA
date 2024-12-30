@@ -79,7 +79,9 @@ setmetatable(weapon_name, {
 local fuck_valve = {
 	['weapon_revolver'] = 'R8 Revolver',
 	['weapon_usp_silencer'] = 'USP-S',
-	['weapon_m4a1_silencer'] = 'M4A1-S'
+	['weapon_m4a1_silencer'] = 'M4A1-S',
+	['weapon_mp5sd'] = 'MP5-SD',
+	['weapon_cz75a'] = 'CZ75-Auto'
 };
 
 setmetatable(fuck_valve, {
