@@ -1,13 +1,8 @@
 local logs = gui.checkbox(gui.control_id('enable_logs'));
--- local debug_logs = gui.checkbox(gui.control_id('enable_debug'));
 local row = gui.make_control('Notify Logs', logs);
--- local test = gui.make_control('Debug Logs', debug_logs);
 local group = gui.ctx:find('lua>elements a');
--- local group_b = gui.ctx:find('lua>elements b');
 group:add(row);
--- group_b:add(test);
 
-local w, h = game.engine:get_screen_size();
 local hitgroup = {
 	[0] = 'generic',
 	[1] = 'head',
@@ -75,17 +70,17 @@ local weapon_name = {
 	['inferno'] = 'Fire'
 };
 
-local fuck_valve = {
-	['weapon_revolver'] = 'R8 Revolver',
-	['weapon_usp_silencer'] = 'USP-S',
-	['weapon_m4a1_silencer'] = 'M4A1-S'
-};
-
 setmetatable(weapon_name, {
     __index = function(_, key)
         return 'undefined';
     end
 });
+
+local fuck_valve = {
+	['weapon_revolver'] = 'R8 Revolver',
+	['weapon_usp_silencer'] = 'USP-S',
+	['weapon_m4a1_silencer'] = 'M4A1-S'
+};
 
 setmetatable(fuck_valve, {
     __index = function(_, key)
@@ -108,15 +103,23 @@ setmetatable(bomb_events, {
 });
 
 local function bomb_logs(event)
-	print('<'..
-		event:get_controller('userid'):get_name()..
+	local userid = 'undefined';
+	
+	if event:get_controller('userid'):get_name() ~= nil then
+		userid = event:get_controller('userid'):get_name();
+	end
+	
+	local message = '<'..
+		userid..
 		'>'..
-		bomb_events[event:get_name()]);
+		bomb_events[event:get_name()];
+		
+	print(message);
 	
 	return gui.notify:add(gui.notification(
 		'<'..
-		event:get_controller('userid'):get_name()..
-		'>', 
+		userid..
+		'>',
 		bomb_events[event:get_name()], 
 		draw.textures['icon_visuals']));
 end
@@ -131,8 +134,14 @@ local function hit_logs(event)
 		weapon = fuck_valve[event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name];
 	end
 	
+	local userid = 'undefined';
+	
+	if event:get_controller('userid'):get_name() ~= nil then
+		userid = event:get_controller('userid'):get_name();
+	end
+	
 	local message = 'Hit <'
-		..event:get_controller('userid'):get_name()..
+		..userid..
 		'> for '
 		..event:get_int('dmg_health')..
 		' ('
@@ -151,8 +160,14 @@ local function hit_logs(event)
 end
 
 local function hurt_logs(event)
+	local attacker = 'undefined';
+	
+	if event:get_controller('attacker'):get_name() ~= nil then
+		attacker = event:get_controller('attacker'):get_name();
+	end
+	
 	local message = 'Hurt by <'
-		..event:get_controller('attacker'):get_name()..
+		..attacker..
 		'> for '
 		..event:get_int('dmg_health')..
 		' ('
