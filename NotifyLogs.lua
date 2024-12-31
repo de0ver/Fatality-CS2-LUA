@@ -135,8 +135,6 @@ local function bomb_logs(event, console, notify)
 		bomb_events[event:get_name()], 
 		draw.textures['icon_visuals']));
 	end
-	
-	return;
 end
 
 local function hit_logs(event, console, notify)
@@ -206,8 +204,6 @@ local function hurt_logs(event, console, notify)
 		message, 
 		draw.textures['icon_legit']));
 	end
-	
-	return;
 end
 
 local function round_logs(event, console, notify)
@@ -223,26 +219,27 @@ local function round_logs(event, console, notify)
 		'Buy weapons and FIGHT!!!', 
 		draw.textures['icon_visuals']));
 	end
-	
-	return;
 end
 
 local function on_event(event)
-	if logs:get_value():get() or console_logs:get_value():get() then
+	local l = logs:get_value():get();
+	local c = console_logs:get_value():get();
+
+	if l or c then
 		if event:get_name() == 'player_hurt' then
 			if event:get_controller('attacker') == entities.get_local_controller() then
-				return hit_logs(event, console_logs:get_value():get(), logs:get_value():get());
+				return hit_logs(event, c, l);
 			elseif event:get_controller('userid') == entities.get_local_controller() then
-				return hurt_logs(event, console_logs:get_value():get(), logs:get_value():get());
+				return hurt_logs(event, c, l);
 			end
 		end
 		
 		if event:get_name() == 'round_start' then
-			return round_logs(event, console_logs:get_value():get(), logs:get_value():get());
+			return round_logs(event, c, l);
 		end
 		 
 		if string.find(event:get_name(), 'bomb_') then
-			return bomb_logs(event, console_logs:get_value():get(), logs:get_value():get());
+			return bomb_logs(event, c, l);
 		end
 	end
 end
