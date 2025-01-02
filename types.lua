@@ -256,3 +256,15 @@ function chandle:valid() end
 
 --- @return boolean
 function chandle:is_clientside() end
+
+--- @class mods
+--- @field events events_t;
+mods = {};
+
+--- @class events_t
+events = {};
+
+--- @param name string
+function events:add_listener(name)
+end
+

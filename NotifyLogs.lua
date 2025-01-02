@@ -111,6 +111,17 @@ setmetatable(bomb_events, {
     end
 });
 
+local round_events = {
+	['round_start'] = {'Round started!', 'Buy weapons and FIGHT!!!'},
+	['round_end'] = {'Round end.', 'Better luck next time.'}
+};
+
+setmetatable(round_events, {
+    __index = function(_, key)
+        return {key, 'undefined'};
+    end
+});
+
 local function bomb_logs(event, console, notify)
 	local userid = 'undefined';
 	
@@ -127,7 +138,7 @@ local function bomb_logs(event, console, notify)
 		print(message);
 	end
 	
-	if (notify) then
+	if notify then
 		gui.notify:add(gui.notification(
 		'<'..
 		userid..
@@ -139,12 +150,13 @@ end
 
 local function hit_logs(event, console, notify)
 	local weapon = 'undefined';
+	local event_weapon = event:get_string('weapon');
+	local attacker_weapon = event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name;
 	
-	if weapon_name[event:get_string('weapon')] ~= 'undefined' and 
-		fuck_valve[event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name] == event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name then
-		weapon = weapon_name[event:get_string('weapon')];
+	if weapon_name[event_weapon] ~= 'undefined' and fuck_valve[attacker_weapon] == attacker_weapon then
+		weapon = weapon_name[event_weapon];
 	else 
-		weapon = fuck_valve[event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name];
+		weapon = fuck_valve[attacker_weapon];
 	end
 	
 	local userid = 'undefined';
@@ -207,16 +219,25 @@ local function hurt_logs(event, console, notify)
 end
 
 local function round_logs(event, console, notify)
-	local message = 'Round started!'..'Buy weapons and FIGHT!!!';
-	
+	local event_name = event:get_name();
+	local message = round_events[event_name];
+
+	if event:get_string('message') ~= nil then
+		if string.find(event:get_string('message'), '_Terrorists') then
+			message[2] = 'Terrorists win!';
+		elseif string.find(event:get_string('message'), '_CTs_') then
+			message[2] = 'Counter-Terrorists win!';
+		end
+	end
+
 	if console then
-		print(message);
+		print(message[1]..message[2]);
 	end
 	
 	if notify then
 		gui.notify:add(gui.notification(
-		'Round started!', 
-		'Buy weapons and FIGHT!!!', 
+		message[1], 
+		message[2], 
 		draw.textures['icon_visuals']));
 	end
 end
@@ -224,9 +245,10 @@ end
 local function on_event(event)
 	local l = logs:get_value():get();
 	local c = console_logs:get_value():get();
+	local e = event:get_name();
 
 	if l or c then
-		if event:get_name() == 'player_hurt' then
+		if e == 'player_hurt' then
 			if event:get_controller('attacker') == entities.get_local_controller() then
 				return hit_logs(event, c, l);
 			elseif event:get_controller('userid') == entities.get_local_controller() then
@@ -234,14 +256,16 @@ local function on_event(event)
 			end
 		end
 		
-		if event:get_name() == 'round_start' then
+		if string.find(e, 'round_') then
 			return round_logs(event, c, l);
 		end
 		 
-		if string.find(event:get_name(), 'bomb_') then
+		if string.find(e, 'bomb_') then
 			return bomb_logs(event, c, l);
 		end
 	end
 end
+
+mods.events:add_listener('round_end');
 
 events.event:add(on_event);
