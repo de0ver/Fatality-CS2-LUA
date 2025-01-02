@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-doc-field
 --[[ ~~~~ Lua API Snippet for Fatality.win CS2 by @de0ver ~~~~ ]]--
 --[[ ~~~~~~~~~~~~~~~~ Create Date: 31.12.2024 ~~~~~~~~~~~~~~~~ ]]--
 
@@ -132,9 +133,37 @@ texture = {};
 --- @field dist_sqr fun(other: vec2): number;
 vec2 = {};
 
+-- https://lua.fatality.win/draw.html
 --- @class draw
---- @field textures texture;
+--- @field adapter adapter;
+--- @field frame_time number;
+--- @field time number;
+--- @field scale number;
+--- @field display vec2;
+--- @field textures accessor<texture>;
+--- @field fonts accessor<font_base>;
+--- @field shaders accessor<shader>;
+--- @field surface layer;
 draw = {};
+
+-- https://lua.fatality.win/adapter.html
+--- @class adapter
+adapter = {};
+
+--- @return ptr;
+function adapter:get_back_buffer()
+end
+
+--- @return ptr;
+function adapter:get_back_buffer_downsampled()
+end
+
+--- @return ptr;
+function adapter:get_shared_texture()
+end
+
+--- @class ptr
+ptr = {};
 
 -- https://lua.fatality.win/rcolor.html
 --- @class color: draw

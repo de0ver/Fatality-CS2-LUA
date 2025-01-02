@@ -125,7 +125,7 @@ setmetatable(round_events, {
 local function bomb_logs(event, console, notify)
 	local userid = 'undefined';
 	
-	if event:get_controller('userid'):get_name() ~= nil then
+	if event:get_controller('userid') ~= nil then
 		userid = event:get_controller('userid'):get_name();
 	end
 	
@@ -161,7 +161,7 @@ local function hit_logs(event, console, notify)
 	
 	local userid = 'undefined';
 	
-	if event:get_controller('userid'):get_name() ~= nil then
+	if event:get_controller('userid') ~= nil then
 		userid = event:get_controller('userid'):get_name();
 	end
 	
@@ -191,7 +191,7 @@ end
 local function hurt_logs(event, console, notify)
 	local attacker = 'undefined';
 	
-	if event:get_controller('attacker'):get_name() ~= nil then
+	if event:get_controller('attacker') ~= nil then
 		attacker = event:get_controller('attacker'):get_name();
 	end
 	
