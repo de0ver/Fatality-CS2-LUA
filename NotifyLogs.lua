@@ -150,8 +150,17 @@ end
 
 local function hit_logs(event, console, notify)
 	local weapon = 'undefined';
-	local event_weapon = event:get_string('weapon');
-	local attacker_weapon = event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name;
+	local event_weapon = 'undefined';
+	local attacker_weapon = 'undefined';
+
+	if event:get_string('weapon') ~= nil then
+		event_weapon = event:get_string('weapon');
+	end
+
+	if event:get_pawn_from_id('attacker') ~= nil then
+		attacker_weapon = event:get_pawn_from_id('attacker'):get_active_weapon():get_data().name;
+	end
+	
 	
 	if weapon_name[event_weapon] ~= 'undefined' and fuck_valve[attacker_weapon] == attacker_weapon then
 		weapon = weapon_name[event_weapon];
