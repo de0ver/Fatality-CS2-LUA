@@ -4,9 +4,15 @@
 local enable_sounds = gui.checkbox(gui.control_id('enable_sounds'));
 local sounds = gui.make_control('Enable Rus Kill Sounds', enable_sounds);
 
+local random_sounds = gui.checkbox(gui.control_id('random_sounds'));
+local random = gui.make_control('!TToXyUI_He_Pa6oTaeT!', random_sounds);
+
 local group = gui.ctx:find('lua>elements a');
 
 group:add(sounds);
+group:reset();
+
+group:add(random);
 group:reset();
 
 local file_type = '.vsnd_c';
@@ -22,7 +28,7 @@ local sounds = {
     [9] = 'play \\sounds\\megakill',
     [12] = 'play \\sounds\\monsterkill',
     [5] = 'play \\sounds\\rampage',
-    [3] = 'play \\sounds\\triplekill',
+    [3] = 'play \\sounds\\tripplekill',
     [4] = 'play \\sounds\\ultrakill',
     [11] = 'play \\sounds\\unstoppable',
     [10] = 'play \\sounds\\wickedsick'
@@ -35,7 +41,16 @@ local random_number = {
 }
 
 local function on_kill(event)
-    kill_counter = kill_counter + 1;
+
+    if not random_sounds:get_value():get() then
+        kill_counter = kill_counter + 1;
+
+        if kill_counter > 13 then
+            kill_counter = math.random(6, 13);
+        end
+    else
+        kill_counter = math.random(1, 13);    
+    end
 
     return game.engine:client_cmd(sounds[kill_counter]..random_number[math.random(1, 3)]..file_type);
 end
