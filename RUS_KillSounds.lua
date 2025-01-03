@@ -19,25 +19,25 @@ local file_type = '.vsnd_c';
 local kill_counter = 0;
 
 local sounds = {
-    [6] = 'play \\sounds\\dominate',
-    [2] = 'play \\sounds\\doublekill',
-    [1] = 'play \\sounds\\firstblood',
-    [7] = 'play \\sounds\\godlike',
-    [8] = 'play \\sounds\\holyshit',
-    [13] = 'play \\sounds\\killingspree',
-    [9] = 'play \\sounds\\megakill',
-    [12] = 'play \\sounds\\monsterkill',
-    [5] = 'play \\sounds\\rampage',
-    [3] = 'play \\sounds\\tripplekill',
-    [4] = 'play \\sounds\\ultrakill',
-    [11] = 'play \\sounds\\unstoppable',
-    [10] = 'play \\sounds\\wickedsick'
+    'firstblood',
+    'doublekill',
+    'tripplekill',
+    'ultrakill',
+    'rampage',
+    'dominate',
+    'godlike',
+    'holyshit',
+    'megakill',
+    'wickedsick',
+    'unstoppable',
+    'monsterkill',
+    'killingspree',
 };
 
 local random_number = {
-    [1] = '_v1',
-    [2] = '_v2',
-    [3] = '_v3'
+    '_v1',
+    '_v2',
+    '_v3'
 }
 
 local function on_kill(event)
@@ -45,14 +45,14 @@ local function on_kill(event)
     if not random_sounds:get_value():get() then
         kill_counter = kill_counter + 1;
 
-        if kill_counter > 13 then
-            kill_counter = math.random(6, 13);
+        if kill_counter > #sounds then
+            kill_counter = math.random(6, #sounds);
         end
     else
-        kill_counter = math.random(1, 13);    
+        kill_counter = math.random(1, #sounds);    
     end
 
-    return game.engine:client_cmd(sounds[kill_counter]..random_number[math.random(1, 3)]..file_type);
+    return game.engine:client_cmd('play \\sounds\\'..sounds[kill_counter]..random_number[math.random(1, 3)]..file_type);
 end
 
 local function on_event(event)
