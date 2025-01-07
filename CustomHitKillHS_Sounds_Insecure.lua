@@ -1,11 +1,15 @@
-if utils.find_export('user32.dll', 'MessageBoxA') == 0 then
-    gui.notify:add(
+local function createNotify(title, body, texture)
+    return gui.notify:add(
         gui.notification(
-            'WARNING!', 
-            'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', 
-            draw.textures['icon_allow_insecure']
+            title,
+            body,
+            texture
         )
     );
+end
+
+if utils.find_export('user32.dll', 'MessageBoxA') == 0 then
+    return createNotify('WARNING!', 'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', draw.textures['icon_allow_insecure']);
 end
 
 local hitsound_box = gui.combo_box(gui.control_id('hitsound_box'));
@@ -20,6 +24,9 @@ local en_hithssounds = gui.make_control('Head Hit Sounds', hithssound_box);
 local killhssound_box = gui.combo_box(gui.control_id('killhssound_box'));
 local en_killhssounds = gui.make_control('Head Kill Sounds', killhssound_box);
 
+local open_sounds_path = gui.button(gui.control_id('open_sounds_path'), 'Open!');
+local btn_sounds_path = gui.make_control('Open Sounds Folder', open_sounds_path);
+
 local group = gui.ctx:find('lua>elements a');
 group:add(en_hitsounds);
 group:reset();
@@ -31,6 +38,9 @@ group:add(en_hithssounds);
 group:reset();
 
 group:add(en_killhssounds);
+group:reset();
+
+group:add(btn_sounds_path);
 group:reset();
 
 local sounds_table = {};
@@ -58,12 +68,18 @@ ffi.cdef[[
     bool FindNextFileA(void* hFindFile, WIN32_FIND_DATAA* lpFindFileData);
     bool FindClose(void* hFindFile);
     unsigned int GetCurrentDirectoryA(unsigned int nBufferLength, char* lpBuffer);
+    int ShellExecuteA(int hwnd, const char* lpOperation, const char* lpFile, const char* lpParameters, const char* lpDirectory, int nShowCmd);
+    int URLDownloadToFileA(const char* pCaller, const char* szURL, const char* szFileName, unsigned int dwReserved, int lpfnCB);
+    unsigned int GetFileAttributesA(const char* lpFileName);
 ]];
 
 local GetCurrentDirectoryA = ffi.cast('unsigned int(__stdcall*)(unsigned int, char*)', utils.find_export('kernel32.dll', 'GetCurrentDirectoryA'));
 local FindFirstFileA = ffi.cast('void*(__stdcall*)(const char*, WIN32_FIND_DATAA*)', utils.find_export('kernel32.dll', 'FindFirstFileA'));
 local FindNextFileA = ffi.cast('bool(__stdcall*)(void*, WIN32_FIND_DATAA*)', utils.find_export('kernel32.dll', 'FindNextFileA'));
 local FindClose = ffi.cast('bool(__stdcall*)(void*)', utils.find_export('kernel32.dll', 'FindClose'));
+local ShellExecuteA = ffi.cast('int(__stdcall*)(int, const char*, const char*, const char*, const char*, int)', utils.find_export('shell32.dll', 'ShellExecuteA'));
+local URLDownloadToFileA = ffi.cast('int(__stdcall*)(const char*, const char*, const char*, unsigned int, int)', utils.find_export('urlmon.dll', 'URLDownloadToFileA'));
+local GetFileAttributesA = ffi.cast('unsigned int(__stdcall*)(const char*)', utils.find_export('kernel32.dll', 'GetFileAttributesA'));
 
 GetCurrentDirectoryA(MAX_PATH, lpBuffer);
 
@@ -82,7 +98,7 @@ local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menag
     local hFind = FindFirstFileA(path .. '\\*', findFileData);
 
     if (hFind == -1) then
-        return print('Invalid File Handle.');
+        return createNotify('Fail!', 'Invalid File Handle.', draw.textures['icon_close']);
     end
 
     local bits = 1;
@@ -103,26 +119,40 @@ local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menag
 end
 
 local function onLoadLUA()
+    if GetFileAttributesA(cs2_sounds_path..'\\roblox.vsnd_c') == 4294967295 then
+        if URLDownloadToFileA(nil, 
+        "https://raw.githubusercontent.com/de0ver/Fatality-CS2-LUA/refs/heads/main/sounds/other_sounds/roblox.vsnd_c", 
+        cs2_sounds_path..'\\roblox.vsnd_c', 0, 0) == 0 then
+            createNotify('Success!', 'Downloaded Roblox Sound!', draw.textures['gui_icon_add']);
+        else
+            createNotify('Fail!', 'Something went wrong!', draw.textures['icon_close']);
+        end 
+    end
+
+    open_sounds_path:add_callback(function ()
+        return ShellExecuteA(0, 'open', ffi.string(cs2_sounds_path), nil, nil, 1);
+    end);
+
     listFiles(cs2_sounds_path);
 end
 
 local function cmd(command)
-    return game.engine:client_cmd(command);
+    return game.engine:client_cmd('play \\sounds\\'..command);
 end
 
-local function on_hit(e, h_hs, h)
+local function onHit(e, h_hs, h)
     if h_hs and e:get_int('hitgroup') == 1 then
-        return cmd('play \\sounds\\'..sounds_table[hithssound_box:get_value():get():get_raw()]);
+        return cmd(sounds_table[hithssound_box:get_value():get():get_raw()]);
     elseif h then
-        return cmd('play \\sounds\\'..sounds_table[hitsound_box:get_value():get():get_raw()]);
+        return cmd(sounds_table[hitsound_box:get_value():get():get_raw()]);
     end
 end
 
-local function on_kill(e, k_hs, k)
+local function onKill(e, k_hs, k)
     if k_hs and e:get_int('hitgroup') == 1 then
-        return cmd('play \\sounds\\'..sounds_table[killhssound_box:get_value():get():get_raw()]);
+        return cmd(sounds_table[killhssound_box:get_value():get():get_raw()]);
     elseif k then
-        return cmd('play \\sounds\\'..sounds_table[killsound_box:get_value():get():get_raw()]);
+        return cmd(sounds_table[killsound_box:get_value():get():get_raw()]);
     end
 end
 
@@ -136,12 +166,12 @@ events.event:add(function (e)
         if e:get_name() == 'player_hurt' then
             if e:get_controller('attacker') == entities.get_local_controller() then
                 if not k and not k_hs then
-                    return on_hit(e, h_hs, h);
+                    return onHit(e, h_hs, h);
                 else
                     if e:get_int('health') > 0 then
-                        return on_hit(e, h_hs, h);
+                        return onHit(e, h_hs, h);
                     elseif e:get_int('health') <= 0 then
-                        return on_kill(e, k_hs, k);
+                        return onKill(e, k_hs, k);
                     end
                 end
             end
