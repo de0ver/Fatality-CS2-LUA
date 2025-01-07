@@ -27,21 +27,24 @@ local en_killhssounds = gui.make_control('Head Kill Sounds', killhssound_box);
 local open_sounds_path = gui.button(gui.control_id('open_sounds_path'), 'Open!');
 local btn_sounds_path = gui.make_control('Open Sounds Folder', open_sounds_path);
 
+local refresh_sounds = gui.button(gui.control_id('refresh_sounds'), 'Refresh');
+local btn_refresh_sounds = gui.make_control('Refresh Sounds', refresh_sounds);
+
 local group = gui.ctx:find('lua>elements a');
-group:add(en_hitsounds);
-group:reset();
 
-group:add(en_killsounds);
-group:reset();
+local function createCombo()
+    group:add(en_hitsounds);
+    group:reset();
 
-group:add(en_hithssounds);
-group:reset();
+    group:add(en_killsounds);
+    group:reset();
 
-group:add(en_killhssounds);
-group:reset();
+    group:add(en_hithssounds);
+    group:reset();
 
-group:add(btn_sounds_path);
-group:reset();
+    group:add(en_killhssounds);
+    group:reset();
+end
 
 local sounds_table = {};
 local MAX_PATH = 260;
@@ -93,6 +96,23 @@ local function addValueToAllCombo(value)
     killhssound_box:add(gui.selectable(gui.control_id('killhs'..value), value));
 end
 
+--[[
+local function clearAllCombo(value)
+    hitsound_box:remove(hitsound_box:find('hit'..value));
+    killsound_box:remove(killsound_box:find('kill'..value));
+    hithssound_box:remove(hithssound_box:find('hiths'..value));
+    killhssound_box:remove(killhssound_box:find('killhs'..value));
+    hitsound_box:reset();
+end
+
+local function setValueToAllCombo(value)
+    hitsound_box:get_value():get():set_raw(value);
+    killsound_box:get_value():get():set_raw(value);
+    hithssound_box:get_value():get():set_raw(value);
+    killhssound_box:get_value():get():set_raw(value);
+end
+]]--
+
 local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menage_files/fn_findfirstfile.htm
     local findFileData = ffi.new('WIN32_FIND_DATAA');
     local hFind = FindFirstFileA(path .. '\\*', findFileData);
@@ -118,7 +138,45 @@ local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menag
     FindClose(hFind);
 end
 
+--[[
+local function listFilesRef(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menage_files/fn_findfirstfile.htm
+    local findFileData = ffi.new('WIN32_FIND_DATAA');
+    local hFind = FindFirstFileA(path .. '\\*', findFileData);
+
+    if (hFind == -1) then
+        return createNotify('Fail!', 'Invalid File Handle.', draw.textures['icon_close']);
+    end
+    
+    repeat
+        local cFileName = ffi.string(findFileData.cFileName);
+        if cFileName ~= '.' and cFileName ~= '..' and string.find(cFileName, '.vsnd_c') then
+            clearAllCombo(cFileName);
+        end
+    until not FindNextFileA(hFind, findFileData);
+
+    setValueToAllCombo(1);
+
+    table.clear(sounds_table);
+
+    FindClose(hFind);
+end
+]]--
+
+local function refreshSounds()
+    return createNotify('WIP', 'The current API does not allow to create this. Reload script to refresh...', draw.textures['icon_scripts']);
+    -- listFilesRef(cs2_sounds_path);
+    -- listFiles(cs2_sounds_path);
+end
+
 local function onLoadLUA()
+    createCombo();
+
+    group:add(btn_sounds_path);
+    group:reset();
+
+    group:add(btn_refresh_sounds);
+    group:reset();
+
     if GetFileAttributesA(cs2_sounds_path..'\\roblox.vsnd_c') == 4294967295 then
         if URLDownloadToFileA(nil, 
         "https://raw.githubusercontent.com/de0ver/Fatality-CS2-LUA/refs/heads/main/sounds/other_sounds/roblox.vsnd_c", 
@@ -131,6 +189,10 @@ local function onLoadLUA()
 
     open_sounds_path:add_callback(function ()
         return ShellExecuteA(0, 'open', ffi.string(cs2_sounds_path), nil, nil, 1);
+    end);
+
+    refresh_sounds:add_callback(function ()
+        return refreshSounds();
     end);
 
     listFiles(cs2_sounds_path);
