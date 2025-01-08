@@ -122,13 +122,14 @@ local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menag
     end
 
     local bits = 1;
+    local max_bits = 2 ^ 32;
 
     addValueToAllCombo('None');
     sounds_table[bits] = 'None';
 
     repeat
         local cFileName = ffi.string(findFileData.cFileName);
-        if cFileName ~= '.' and cFileName ~= '..' and string.find(cFileName, '.vsnd_c') then
+        if bits <= max_bits and cFileName ~= '.' and cFileName ~= '..' and string.find(cFileName, '.vsnd_c') then
             addValueToAllCombo(cFileName);
             bits = bits * 2;
             sounds_table[bits] = cFileName;
@@ -139,7 +140,7 @@ local function listFiles(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menag
 end
 
 --[[
-local function listFilesRef(path) -- https://vsokovikov.narod.ru/New_MSDN_API/Menage_files/fn_findfirstfile.htm
+local function listFilesRef(path)
     local findFileData = ffi.new('WIN32_FIND_DATAA');
     local hFind = FindFirstFileA(path .. '\\*', findFileData);
 
