@@ -78,6 +78,11 @@ local function SmokeColorChanger(entity)
 end
 
 local function readEntities()
+
+    if not enable_smoke_color:get_value():get() then
+        return;
+    end
+
     local dwGameEntitySystem = ffi.cast('uintptr_t*', client + client_dll.dwGameEntitySystem)[0];
     local dwGameEntitySystem_highestEntityIndex = ffi.cast('int*', dwGameEntitySystem + client_dll.dwGameEntitySystem_highestEntityIndex)[0];
 
@@ -113,8 +118,5 @@ local function readEntities()
     end
 end
 
-if enable_smoke_color:get_value():get() then
-    events.present_queue:add(readEntities);
-else 
-    return;
-end
+
+events.present_queue:add(readEntities);
