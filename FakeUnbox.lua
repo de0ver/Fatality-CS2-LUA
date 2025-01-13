@@ -28,15 +28,20 @@ local symbol = {
     [4] = ''
 }
 
-rare:add(gui.selectable(gui.control_id('rare_red'), 'red'));
-rare:add(gui.selectable(gui.control_id('rare_blue'), 'blue'));
-rare:add(gui.selectable(gui.control_id('rare_pink'), 'pink'));
+rare:add(gui.selectable(gui.control_id('rare_red'), 'Red'));
+rare:add(gui.selectable(gui.control_id('rare_blue'), 'Blue'));
+rare:add(gui.selectable(gui.control_id('rare_pink'), 'Pink'));
 
 
 button:add_callback(function ()
 
     if not game.engine:in_game() then
-        return gui.notify:add(gui.notification('GO TO MAP!', 'Connext to server or smth', draw.textures['icon_close']));
+        return gui.notify:add(
+            gui.notification(
+                'GO TO MAP!', 'Connect to server or smth', 
+                draw.textures['icon_close']
+            )
+        );
     end
 
     local stattrak_text = ' ';
@@ -51,13 +56,15 @@ button:add_callback(function ()
     end
 
     game.engine:client_cmd(
-        string.format('Playerchatwheel CW.NeedQuiet "%s has opened a container and found: %s %s %s %s | %s"', 
-        entities:get_local_controller():get_name(),
-        symbol[rare:get_value():get():get_raw()],
-        star_text,
-        stattrak_text,
-        item_name.value,
-        skin_name.value)
+        string.format(
+            'Playerchatwheel CW.NeedQuiet "%s has opened a container and found: %s %s %s %s | %s"', 
+            entities:get_local_controller():get_name(),
+            symbol[rare:get_value():get():get_raw()],
+            star_text,
+            stattrak_text,
+            item_name.value,
+            skin_name.value
+        )
     );
     
 end);

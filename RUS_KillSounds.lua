@@ -8,12 +8,10 @@ local random_sounds = gui.checkbox(gui.control_id('random_sounds'));
 local random = gui.make_control('!TToXyUI_He_Pa6oTaeT!', random_sounds);
 
 local group = gui.ctx:find('lua>elements a');
+group:reset();
 
 group:add(sounds);
-group:reset();
-
 group:add(random);
-group:reset();
 
 local file_type = '.vsnd_c';
 local kill_counter = 0;
