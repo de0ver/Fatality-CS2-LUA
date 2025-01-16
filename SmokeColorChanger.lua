@@ -110,7 +110,7 @@ local function readEntities()
             goto continue
         end
 
-        if ffi.string(ffi.cast('char*', m_designerName)) == 'smokegrenade_projectile' then
+        if string.find(ffi.string(ffi.cast('char*', m_designerName)), 'smokegrenade_projectile') then
             SmokeColorChanger(C_BaseEntity);
         end
 
