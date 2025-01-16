@@ -8,7 +8,7 @@ local function createNotify(title, body, texture)
     );
 end
 
-if utils.find_export('user32.dll', 'MessageBoxA') == 0 then
+if ffi == nil then
     return createNotify('WARNING!', 'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', draw.textures['icon_allow_insecure']);
 end
 
@@ -31,24 +31,19 @@ local refresh_sounds = gui.button(gui.control_id('refresh_sounds'), 'Refresh');
 local btn_refresh_sounds = gui.make_control('Refresh Sounds', refresh_sounds);
 
 local group = gui.ctx:find('lua>elements a');
+group:reset();
 
 local function createCombo()
     group:add(en_hitsounds);
-    group:reset();
-
     group:add(en_killsounds);
-    group:reset();
-
     group:add(en_hithssounds);
-    group:reset();
-
     group:add(en_killhssounds);
-    group:reset();
 end
 
 local sounds_table = {};
 local MAX_PATH = 260;
 local lpBuffer = ffi.new('char[?]', MAX_PATH);
+local sound_link = 'https://raw.githubusercontent.com/de0ver/Fatality-CS2-LUA/refs/heads/main/sounds/other_sounds/roblox.vsnd_c';
 
 ffi.cdef[[
     typedef struct {
@@ -173,15 +168,11 @@ local function onLoadLUA()
     createCombo();
 
     group:add(btn_sounds_path);
-    group:reset();
 
     group:add(btn_refresh_sounds);
-    group:reset();
 
     if GetFileAttributesA(cs2_sounds_path..'\\roblox.vsnd_c') == 4294967295 then
-        if URLDownloadToFileA(nil, 
-        "https://raw.githubusercontent.com/de0ver/Fatality-CS2-LUA/refs/heads/main/sounds/other_sounds/roblox.vsnd_c", 
-        cs2_sounds_path..'\\roblox.vsnd_c', 0, 0) == 0 then
+        if URLDownloadToFileA(nil, sound_link, cs2_sounds_path..'\\roblox.vsnd_c', 0, 0) == 0 then
             createNotify('Success!', 'Downloaded Roblox Sound!', draw.textures['gui_icon_add']);
         else
             createNotify('Fail!', 'Something went wrong!', draw.textures['icon_close']);
