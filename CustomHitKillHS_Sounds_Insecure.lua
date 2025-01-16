@@ -30,14 +30,20 @@ local btn_sounds_path = gui.make_control('Open Sounds Folder', open_sounds_path)
 local refresh_sounds = gui.button(gui.control_id('refresh_sounds'), 'Refresh');
 local btn_refresh_sounds = gui.make_control('Refresh Sounds', refresh_sounds);
 
+local sound_volume = gui.slider(gui.control_id('sound_volume'), 0.0, 100.0, {'%.00f%%'}, 0.1);
+local slider_sound_volume = gui.make_control('Sounds Volume', sound_volume);
+
 local group = gui.ctx:find('lua>elements a');
 group:reset();
 
-local function createCombo()
+local function createGUI()
     group:add(en_hitsounds);
     group:add(en_killsounds);
     group:add(en_hithssounds);
     group:add(en_killhssounds);
+    group:add(slider_sound_volume);
+    group:add(btn_sounds_path);
+    group:add(btn_refresh_sounds);
 end
 
 local sounds_table = {};
@@ -165,11 +171,7 @@ local function refreshSounds()
 end
 
 local function onLoadLUA()
-    createCombo();
-
-    group:add(btn_sounds_path);
-
-    group:add(btn_refresh_sounds);
+    createGUI();
 
     if GetFileAttributesA(cs2_sounds_path..'\\roblox.vsnd_c') == 4294967295 then
         if URLDownloadToFileA(nil, sound_link, cs2_sounds_path..'\\roblox.vsnd_c', 0, 0) == 0 then
@@ -178,6 +180,10 @@ local function onLoadLUA()
             createNotify('Fail!', 'Something went wrong!', draw.textures['icon_close']);
         end 
     end
+
+    sound_volume:add_callback(function ()
+        return game.engine:client_cmd('snd_toolvolume '..sound_volume:get_value():get() / 100, true);
+    end);
 
     open_sounds_path:add_callback(function ()
         return ShellExecuteA(0, 'open', ffi.string(cs2_sounds_path), nil, nil, 1);
