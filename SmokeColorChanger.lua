@@ -2,56 +2,34 @@
 --[[ ~~~~~~~~~~ Create Date: 11.01.2025 ~~~~~~~~~~ ]]--
 
 if ffi == nil then
-    return gui.notify:add(gui.notification('WARNING!', 'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', draw.textures['icon_close']));
+    return gui.notify:add(
+        gui.notification(
+            'WARNING!', 
+            'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', 
+            draw.textures['icon_close']
+        )
+    );
 end
 
-local enable_smoke_color = gui.checkbox(gui.control_id('enable_smoke_color'));
-local smoke_colorpicker = gui.color_picker(gui.control_id('smoke_colorpicker'));
+local enable_smoke_color = gui.checkbox(gui.control_id('enable_smoke_color_DB33997D-6963-4B60-A35E-8368EB3D44C1'));
+local smoke_colorpicker = gui.color_picker(gui.control_id('smoke_colorpicker_A9CF5E38-5FBA-4295-9D7D-6F305D565263'));
 local control_color = gui.make_control('Enable Smoke Color', enable_smoke_color);
 local control_colorpicker = gui.make_control('Custom Color', smoke_colorpicker);
 
 local group = gui.ctx:find('lua>elements a');
 group:reset();
+
 group:add(control_color);
 group:add(control_colorpicker);
 
 local GetModuleHandleA = ffi.cast('uint64_t(__stdcall*)(const char*)', utils.find_export('kernel32.dll', 'GetModuleHandleA'));
 
-local engine2 = GetModuleHandleA('engine2.dll');
 local client = GetModuleHandleA('client.dll');
 
-local engine2_dll = { -- https://github.com/a2x/cs2-dumper/blob/main/output/offsets.hpp
-    dwBuildNumber = 0x533BE4;
-    dwNetworkGameClient = 0x532CE0;
-    dwNetworkGameClient_clientTickCount = 0x368;
-    dwNetworkGameClient_deltaTick = 0x27C;
-    dwNetworkGameClient_isBackgroundMap = 0x281447;
-    dwNetworkGameClient_localPlayer = 0xF0;
-    dwNetworkGameClient_maxClients = 0x238;
-    dwNetworkGameClient_serverTickCount = 0x36C;
-    dwNetworkGameClient_signOnState = 0x228;
-    dwWindowHeight = 0x616134;
-    dwWindowWidth = 0x616130;
-}
-
 local client_dll = {
-    dwCSGOInput = 0x1A89350;
-    dwEntityList = 0x1A157C8;
-    dwGameEntitySystem = 0x1B38F48;
+    dwEntityList = 0x1A176C8;
+    dwGameEntitySystem = 0x1B3AF68;
     dwGameEntitySystem_highestEntityIndex = 0x20F0;
-    dwGameRules = 0x1A7AF38;
-    dwGlobalVars = 0x185DAD8;
-    dwGlowManager = 0x1A7B758;
-    dwLocalPlayerController = 0x1A65F70;
-    dwLocalPlayerPawn = 0x1869D88;
-    dwPlantedC4 = 0x1A84FA0;
-    dwPrediction = 0x1868B90;
-    dwSensitivity = 0x1A7BC58;
-    dwSensitivity_sensitivity = 0x40;
-    dwViewAngles = 0x1A89720;
-    dwViewMatrix = 0x1A7F620;
-    dwViewRender = 0x1A7FE30;
-    dwWeaponC4 = 0x1A17970;
 }
 
 ffi.cdef[[
@@ -60,9 +38,13 @@ ffi.cdef[[
         float y;
         float z;
     } Vector;
+
+    typedef struct {
+        float m_Value; //float32
+    } GameTime_t;
 ]]
 
-if ffi.cast('int*', engine2 + engine2_dll.dwBuildNumber)[0] ~= 14059 then
+if ffi.cast('int64_t(__stdcall*)()', utils.find_pattern('engine2.dll', '8B 05 ? ? ? ? C3 CC CC CC CC CC CC CC CC CC 48 8B 0D ? ? ? ?'))() ~= 14061 then
     return gui.notify:add(gui.notification('LUA Outdated!', 'Wait until developer update this...', draw.textures['icon_close']));
 end
 
@@ -78,11 +60,6 @@ local function SmokeColorChanger(entity)
 end
 
 local function readEntities()
-
-    if not enable_smoke_color:get_value():get() then
-        return;
-    end
-
     local dwGameEntitySystem = ffi.cast('uintptr_t*', client + client_dll.dwGameEntitySystem)[0];
     local dwGameEntitySystem_highestEntityIndex = ffi.cast('int*', dwGameEntitySystem + client_dll.dwGameEntitySystem_highestEntityIndex)[0];
 
@@ -118,5 +95,8 @@ local function readEntities()
     end
 end
 
-
-events.present_queue:add(readEntities);
+if enable_smoke_color:get_value():get() then
+    events.present_queue:add(readEntities);
+else 
+    return;
+end
