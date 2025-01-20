@@ -1,5 +1,6 @@
-local logs = gui.checkbox(gui.control_id('enable_logs'));
-local console_logs = gui.checkbox(gui.control_id('console_logs'));
+local logs = gui.checkbox(gui.control_id('enable_logs_946AD1D5-2638-4FBD-9283-4EE56ED6161C'));
+local console_logs = gui.checkbox(gui.control_id('console_logs_5F2D4FCD-FE2C-47AF-BFFB-9C82A9A854BC'));
+
 local c_logs = gui.make_control('Notify Logs', logs);
 local c_con_logs = gui.make_control('Console Logs', console_logs);
 local group = gui.ctx:find('lua>elements a');
@@ -7,16 +8,6 @@ group:reset();
 
 group:add(c_logs);
 group:add(c_con_logs);
-
-local function createNotify(title, body, texture)
-    return gui.notify:add(
-        gui.notification(
-            title,
-            body,
-            texture
-        )
-    );
-end
 
 local hitgroup = {
 	[0] = 'generic',
@@ -147,10 +138,12 @@ local function bomb_logs(event, console, notify)
 	end
 	
 	if notify then
-		createNotify(
-			'<'..userid..'>',
-			bomb_events[event:get_name()],
-			draw.textures['icon_visuals']
+		gui.notify:add(
+			gui.notification(
+				'<'..userid..'>',
+				bomb_events[event:get_name()], 
+				draw.textures['icon_visuals']
+			)
 		);
 	end
 end
@@ -197,10 +190,12 @@ local function hit_logs(event, console, notify)
 	end
 	
 	if notify then
-		createNotify(
-			'Hit!',
-			message,
-			draw.textures['icon_rage']
+		gui.notify:add(
+			gui.notification(
+				'Hit!',
+				message,
+				draw.textures['icon_rage']
+			)
 		);
 	end
 end
@@ -228,10 +223,12 @@ local function hurt_logs(event, console, notify)
 	end
 	
 	if notify then
-		createNotify(
-			'Hurt!',
-			message,
-			draw.textures['icon_legit']
+	    gui.notify:add(
+			gui.notification(
+				'Hurt!', 
+				message, 
+				draw.textures['icon_legit']
+			)
 		);
 	end
 end
@@ -253,10 +250,12 @@ local function round_logs(event, console, notify)
 	end
 	
 	if notify then
-		createNotify(
-			message[1],
-			message[2],
-			draw.textures['icon_visuals']
+		gui.notify:add(
+			gui.notification(
+				message[1], 
+				message[2], 
+				draw.textures['icon_visuals']
+			)
 		);
 	end
 end

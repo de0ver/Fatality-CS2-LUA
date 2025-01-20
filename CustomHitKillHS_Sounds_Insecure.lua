@@ -12,25 +12,25 @@ if ffi == nil then
     return createNotify('WARNING!', 'TURN ON ALLOW INSECURE IN LUA AND RELOAD SCRIPT!', draw.textures['icon_allow_insecure']);
 end
 
-local hitsound_box = gui.combo_box(gui.control_id('hitsound_box'));
+local hitsound_box = gui.combo_box(gui.control_id('hitsound_box_D765756A-1628-448B-AB10-A841DB9790DA'));
 local en_hitsounds = gui.make_control('Hit Sounds', hitsound_box);
 
-local killsound_box = gui.combo_box(gui.control_id('killsound_box'));
+local killsound_box = gui.combo_box(gui.control_id('killsound_box_FE0F1172-6513-4713-9F14-BDE4F95818DE'));
 local en_killsounds = gui.make_control('Kill Sounds', killsound_box);
 
-local hithssound_box = gui.combo_box(gui.control_id('hithssound_box'));
+local hithssound_box = gui.combo_box(gui.control_id('hithssound_box_CE7F9221-7F04-400B-B1DF-23F9B604C329'));
 local en_hithssounds = gui.make_control('Head Hit Sounds', hithssound_box);
 
-local killhssound_box = gui.combo_box(gui.control_id('killhssound_box'));
+local killhssound_box = gui.combo_box(gui.control_id('killhssound_box_BD6053DC-E1D0-4111-BD22-E20E2F6F37C3'));
 local en_killhssounds = gui.make_control('Head Kill Sounds', killhssound_box);
 
-local open_sounds_path = gui.button(gui.control_id('open_sounds_path'), 'Open!');
+local open_sounds_path = gui.button(gui.control_id('open_sounds_path_C42D5C0F-D7C1-4A61-82AA-DBC55862247C'), 'Open!');
 local btn_sounds_path = gui.make_control('Open Sounds Folder', open_sounds_path);
 
-local refresh_sounds = gui.button(gui.control_id('refresh_sounds'), 'Refresh');
+local refresh_sounds = gui.button(gui.control_id('refresh_sounds_751F433B-C2AA-4CA9-805B-77FD956EEEBC'), 'Refresh');
 local btn_refresh_sounds = gui.make_control('Refresh Sounds', refresh_sounds);
 
-local sound_volume = gui.slider(gui.control_id('sound_volume'), 0.0, 100.0, {'%.00f%%'}, 0.1);
+local sound_volume = gui.slider(gui.control_id('sound_volume_7E5BFA7B-FDCA-4203-857D-6098FC853D8F'), 0.0, 100.0, {'%.00f%%'}, 0.1);
 local slider_sound_volume = gui.make_control('Sounds Volume', sound_volume);
 
 local group = gui.ctx:find('lua>elements a');
@@ -49,7 +49,6 @@ end
 local sounds_table = {};
 local MAX_PATH = 260;
 local lpBuffer = ffi.new('char[?]', MAX_PATH);
-local sound_link = 'https://raw.githubusercontent.com/de0ver/Fatality-CS2-LUA/refs/heads/main/sounds/other_sounds/roblox.vsnd_c';
 
 ffi.cdef[[
     typedef struct {
@@ -73,8 +72,6 @@ ffi.cdef[[
     bool FindClose(void* hFindFile);
     unsigned int GetCurrentDirectoryA(unsigned int nBufferLength, char* lpBuffer);
     int ShellExecuteA(int hwnd, const char* lpOperation, const char* lpFile, const char* lpParameters, const char* lpDirectory, int nShowCmd);
-    int URLDownloadToFileA(const char* pCaller, const char* szURL, const char* szFileName, unsigned int dwReserved, int lpfnCB);
-    unsigned int GetFileAttributesA(const char* lpFileName);
 ]];
 
 local GetCurrentDirectoryA = ffi.cast('unsigned int(__stdcall*)(unsigned int, char*)', utils.find_export('kernel32.dll', 'GetCurrentDirectoryA'));
@@ -82,8 +79,6 @@ local FindFirstFileA = ffi.cast('void*(__stdcall*)(const char*, WIN32_FIND_DATAA
 local FindNextFileA = ffi.cast('bool(__stdcall*)(void*, WIN32_FIND_DATAA*)', utils.find_export('kernel32.dll', 'FindNextFileA'));
 local FindClose = ffi.cast('bool(__stdcall*)(void*)', utils.find_export('kernel32.dll', 'FindClose'));
 local ShellExecuteA = ffi.cast('int(__stdcall*)(int, const char*, const char*, const char*, const char*, int)', utils.find_export('shell32.dll', 'ShellExecuteA'));
-local URLDownloadToFileA = ffi.cast('int(__stdcall*)(const char*, const char*, const char*, unsigned int, int)', utils.find_export('urlmon.dll', 'URLDownloadToFileA'));
-local GetFileAttributesA = ffi.cast('unsigned int(__stdcall*)(const char*)', utils.find_export('kernel32.dll', 'GetFileAttributesA'));
 
 GetCurrentDirectoryA(MAX_PATH, lpBuffer);
 
@@ -172,14 +167,6 @@ end
 
 local function onLoadLUA()
     createGUI();
-
-    if GetFileAttributesA(cs2_sounds_path..'\\roblox.vsnd_c') == 4294967295 then
-        if URLDownloadToFileA(nil, sound_link, cs2_sounds_path..'\\roblox.vsnd_c', 0, 0) == 0 then
-            createNotify('Success!', 'Downloaded Roblox Sound!', draw.textures['gui_icon_add']);
-        else
-            createNotify('Fail!', 'Something went wrong!', draw.textures['icon_close']);
-        end 
-    end
 
     sound_volume:add_callback(function ()
         return game.engine:client_cmd('snd_toolvolume '..sound_volume:get_value():get() / 100, true);
