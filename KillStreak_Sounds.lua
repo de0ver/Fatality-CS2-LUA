@@ -1,11 +1,11 @@
 --[[ ~~~~ Lua for Fatality.win CS2 by @de0ver ~~~~ ]]--
 --[[ ~~~~~~~~~~ Create Date: 03.01.2025 ~~~~~~~~~~ ]]--
 
-local enable_sounds = gui.checkbox(gui.control_id('enable_sounds'));
+local enable_sounds = gui.checkbox(gui.control_id('enable_sounds_1F7223AC-7657-48D0-A29A-D9C98191FCC1'));
 local sounds = gui.make_control('Enable Rus Kill Sounds', enable_sounds);
 
-local random_sounds = gui.checkbox(gui.control_id('random_sounds'));
-local random = gui.make_control('!TToXyUI_He_Pa6oTaeT!', random_sounds);
+local random_sounds = gui.checkbox(gui.control_id('random_sounds_AF364DB5-F421-4658-BF84-6BC89474EB2C'));
+local random = gui.make_control('Random Sounds', random_sounds);
 
 local group = gui.ctx:find('lua>elements a');
 group:reset();
@@ -57,11 +57,9 @@ local function on_event(event)
     local e = event:get_name();
 
     if enable_sounds:get_value():get() then
-        if e == 'player_hurt' then
+        if e == 'player_death' then
             if event:get_controller('attacker') == entities.get_local_controller() then
-                if event:get_int('health') <= 0 then
-                    return on_kill(event);
-                end
+                return on_kill(event);
             end
         end
 
@@ -71,4 +69,6 @@ local function on_event(event)
     end
 end
 
+
+mods.events:add_listener('player_death');
 events.event:add(on_event);
